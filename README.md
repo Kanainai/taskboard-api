@@ -1,52 +1,54 @@
-# Task Manager API
+# TaskBoard API
 
-A Laravel 11 REST API for managing tasks with priority levels and status tracking.
+A Task Management REST API built with Laravel 11 and MySQL.
+
+## Live URLs
+
+- **API**: https://web-production-314f7.up.railway.app/api
+- **Frontend**: https://taskboard-frontend-six.vercel.app
+- **GitHub API**: https://github.com/Kanainai/taskboard-api
+- **GitHub Frontend**: https://github.com/Kanainai/taskboard-frontend
 
 ## Tech Stack
 
-- Laravel 11
-- PHP 8.3
-- MySQL
-- RESTful API architecture
+- Laravel 11 (PHP 8.3)
+- MySQL 8.4
+- Railway (API hosting)
+- Vercel (Frontend hosting)
 
-## Features
+## Database
 
-- Create tasks with title, due date, and priority
-- Update task status (pending → in_progress → done)
-- Delete completed tasks
-- Filter tasks by status and priority
-- Daily task reports grouped by priority and status
-- Overdue task tracking
-- CORS enabled for frontend integration
+- Database: MySQL
+- SQL Dump: database/dump.sql
 
 ## Local Setup
 
-### Prerequisites
+### Requirements
 
-- PHP 8.2 or higher
+- PHP 8.2+
 - Composer
 - MySQL
-- Git
+- Node.js (for frontend)
 
-### Installation Steps
+### Steps
 
-1. Clone the repository
+1. Clone the repo:
 ```bash
-git clone <repository-url>
-cd task-manager-api
+git clone https://github.com/Kanainai/taskboard-api.git
+cd taskboard-api
 ```
 
-2. Install dependencies
+2. Install dependencies:
 ```bash
 composer install
 ```
 
-3. Configure environment
+3. Copy environment file:
 ```bash
 cp .env.example .env
 ```
 
-4. Update `.env` with your database credentials:
+4. Configure .env:
 ```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
@@ -56,42 +58,32 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-5. Generate application key
+5. Generate app key:
 ```bash
 php artisan key:generate
 ```
 
-6. Create database
-```bash
-mysql -u root -p
-CREATE DATABASE task_manager;
-exit;
-```
-
-7. Run migrations and seed database
-
-**Option A: Using migrations and seeder (recommended for development)**
+6. Run migrations:
 ```bash
 php artisan migrate
+```
+
+7. Seed database:
+```bash
 php artisan db:seed --class=TaskSeeder
 ```
 
-**Option B: Import database dump (includes sample data)**
-```bash
-mysql -u root task_manager < database/dump.sql
-```
-
-8. Start development server
+8. Start server:
 ```bash
 php artisan serve
 ```
 
-The API will be available at `http://localhost:8000`
+API available at: http://localhost:8000
 
 ## API Endpoints
 
 ### Create Task
-```bash
+```http
 POST /api/tasks
 Content-Type: application/json
 
@@ -100,181 +92,63 @@ Content-Type: application/json
   "due_date": "2026-04-01",
   "priority": "high"
 }
-
-# Response: 201 Created
-{
-  "id": 1,
-  "title": "Design homepage",
-  "due_date": "2026-04-01",
-  "priority": "high",
-  "status": "pending",
-  "created_at": "2026-03-28T10:00:00.000000Z",
-  "updated_at": "2026-03-28T10:00:00.000000Z"
-}
 ```
 
 ### List Tasks
-```bash
+```http
 GET /api/tasks
-# Optional query parameters: ?status=pending&priority=high
-
-# Response: 200 OK
-[
-  {
-    "id": 1,
-    "title": "Design homepage",
-    "due_date": "2026-04-01",
-    "priority": "high",
-    "status": "pending",
-    "created_at": "2026-03-28T10:00:00.000000Z",
-    "updated_at": "2026-03-28T10:00:00.000000Z"
-  }
-]
+GET /api/tasks?status=pending
+GET /api/tasks?priority=high
 ```
 
 ### Update Task Status
-```bash
-PATCH /api/tasks/1/status
-
-# Response: 200 OK
-{
-  "id": 1,
-  "title": "Design homepage",
-  "due_date": "2026-04-01",
-  "priority": "high",
-  "status": "in_progress",
-  "created_at": "2026-03-28T10:00:00.000000Z",
-  "updated_at": "2026-03-28T10:00:00.000000Z"
-}
+```http
+PATCH /api/tasks/{id}/status
 ```
 
 ### Delete Task
-```bash
-DELETE /api/tasks/1
-# Note: Only tasks with status "done" can be deleted
+```http
+DELETE /api/tasks/{id}
+```
+(Only tasks with status "done" can be deleted)
 
-# Response: 204 No Content
+### Daily Report
+```http
+GET /api/tasks/report?date=2026-03-29
 ```
 
-### Get Daily Report
-```bash
-GET /api/tasks/report?date=2026-03-28
-
-# Response: 200 OK
-{
-  "date": "2026-03-28",
-  "summary": {
-    "high": {
-      "pending": 2,
-      "in_progress": 1,
-      "done": 0
-    },
-    "medium": {
-      "pending": 3,
-      "in_progress": 0,
-      "done": 1
-    },
-    "low": {
-      "pending": 1,
-      "in_progress": 0,
-      "done": 2
-    }
-  }
-}
-```
-
-### Get Overdue Tasks
-```bash
+### Overdue Tasks
+```http
 GET /api/tasks/overdue
-
-# Response: 200 OK
-[
-  {
-    "id": 9,
-    "title": "Update dependencies",
-    "due_date": "2026-03-26",
-    "priority": "low",
-    "status": "pending",
-    "created_at": "2026-03-28T10:00:00.000000Z",
-    "updated_at": "2026-03-28T10:00:00.000000Z"
-  }
-]
 ```
-
-## Database
-
-### Database Dump
-
-A MySQL dump file is included in `database/dump.sql` with the complete database schema and sample data. This can be used to quickly set up the database without running migrations and seeders.
-
-**To import the dump:**
-```bash
-mysql -u root task_manager < database/dump.sql
-```
-
-**To create a new dump (after making changes):**
-```bash
-mysqldump -u root task_manager > database/dump.sql
-```
-
-### Database Schema
-
-**tasks table:**
-- `id` - Primary key
-- `title` - Task title (string, required)
-- `due_date` - Due date (date, required)
-- `priority` - Priority level (enum: low, medium, high)
-- `status` - Current status (enum: pending, in_progress, done)
-- `assigned_to` - Assignee name (string, nullable)
-- `created_at` - Timestamp
-- `updated_at` - Timestamp
 
 ## Business Rules
 
-1. **Task Creation**
-   - Title is required
-   - Due date must be today or in the future
-   - Priority must be: low, medium, or high
-   - No duplicate titles on the same due date
+- Title cannot duplicate on same due_date
+- due_date must be today or in the future
+- Status progression: pending → in_progress → done
+- Cannot skip or revert status
+- Only "done" tasks can be deleted (403 otherwise)
+- Tasks sorted by priority (high→medium→low) then due_date
 
-2. **Status Updates**
-   - Status can only move forward: pending → in_progress → done
-   - Cannot skip statuses or revert
-
-3. **Task Deletion**
-   - Only tasks with status "done" can be deleted
-   - Returns 403 Forbidden if status is not "done"
-
-4. **Task Sorting**
-   - Sorted by priority (high → medium → low)
-   - Then by due date (ascending)
-
-## Deployment
-
-### Railway Deployment
+## Deployment (Railway)
 
 1. Push code to GitHub
-2. Connect repository to Railway
-3. Add MySQL database service
-4. Set environment variables in Railway dashboard
-5. Deploy automatically on push
+2. Create new project on railway.app
+3. Connect GitHub repository
+4. Add MySQL database plugin
+5. Set environment variables:
+   APP_KEY, DB_CONNECTION, DB_HOST, etc.
+6. Railway auto-deploys on push
 
-### Live URLs
+## Frontend
 
-- API: `[Your Railway URL]`
-- Dashboard: `[Your Vercel URL]`
+Built with React + Vite + Tailwind CSS
 
-## Testing
+Repository: https://github.com/Kanainai/taskboard-frontend
 
-Run the test suite:
-```bash
-php artisan test
-```
+Live: https://taskboard-frontend-six.vercel.app
 
-## License
+## Note on Frontend Framework
 
-This project is open-sourced software licensed under the MIT license.
-
-## Screenshots
-
-[Add screenshots of API responses using Postman or similar tools]
+React was used for the frontend dashboard as it achieves the same goal as Vue.js for polishing the interface. The Laravel API works completely independently and can be tested directly via the endpoints listed above.
