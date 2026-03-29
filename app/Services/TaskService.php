@@ -95,7 +95,7 @@ class TaskService
 
     public function getOverdueTasks(): Collection
     {
-        return Task::where('due_date', '<', Carbon::today())
+        return Task::whereDate('due_date', '<', Carbon::now()->toDateString())
             ->where('status', '!=', 'done')
             ->orderByRaw("FIELD(priority, 'high', 'medium', 'low')")
             ->orderBy('due_date', 'asc')
