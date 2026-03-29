@@ -10,15 +10,12 @@ class TaskSeeder extends Seeder
 {
     public function run(): void
     {
-        // Check if tasks already exist
         if (Task::count() > 0) {
             $this->command->info('Tasks already exist. Skipping seeding to avoid duplicates.');
             return;
         }
 
         $this->command->info('Seeding tasks...');
-
-        $assignees = ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve', null];
         
         $tasks = [
             ['title' => 'Design homepage', 'due_date' => Carbon::today()->addDays(5), 'priority' => 'high', 'status' => 'pending', 'assigned_to' => 'Alice'],
